@@ -13,6 +13,7 @@
 #include "loader.h"
 
 #define PLAYER_NUM 2
+#define POLL_ARRAY_NUM PLAYER_NUM+1
 
 
 void start_server(txt_segment ts) {
@@ -55,7 +56,7 @@ void start_server(txt_segment ts) {
 
 	while(waiting_for_players) {
 		
-		poll(players, 4, -1);
+		poll(players, POLL_ARRAY_NUM, -1);
 
 		
 		for(int i = 0; i < pind; i++) {
@@ -65,11 +66,12 @@ void start_server(txt_segment ts) {
 					len = sizeof(cli);
 					memset(&cli, 0, sizeof(cli));
 					players[pind].fd = accept(soc, (struct sockaddr *) &cli, &len); 
-					recv(players[pind].fd, parray[p_num].uname, sizeof(parray[p_num].uname), 0);
-					write(STDOUT_FILENO, parray[p_num].uname, strlen(parray[p_num].uname));
+					//recv(players[pind].fd, parray[p_num].uname, sizeof(parray[p_num].uname), 0);
+					//write(STDOUT_FILENO, parray[p_num].uname, strlen(parray[p_num].uname));
 					players[pind].events = POLLIN;
-					parray[p_num].txt_pos = 0;
-					parray[p_num].comp_pos = 0;
+					memset(&parray[p_num], 0, sizeof(player));
+					//parray[p_num].txt_pos = 0;
+					//parray[p_num].comp_pos = 0;
 					p_num += 1;
 					pind += 1;
 
@@ -77,7 +79,7 @@ void start_server(txt_segment ts) {
 					char out;
 					recv(players[i].fd, &out, sizeof(char), 0);
 					if(iscntrl(out)) {
-						printf("%s left\n", parray[i-1].uname);
+						//printf("%s left\n", parray[i-1].uname);
 						//exit(0);
 						close(players[i].fd);
 					}
@@ -86,7 +88,7 @@ void start_server(txt_segment ts) {
 
 				}
 			} else if(p_num > PLAYER_NUM - 1) {
-				write(STDOUT_FILENO, "Full\n", 5);
+				//write(STDOUT_FILENO, "Full\n", 5);
 				waiting_for_players = 0;
 			}
 			
@@ -99,17 +101,31 @@ void start_server(txt_segment ts) {
 	for(int i = 1; i < pind; i++) {
 		send(players[i].fd, &ts.size, sizeof(int), 0);
 		send(players[i].fd, ts.buf, sizeof(char) * ts.size, 0);
+		parray[pind-1].txt_pos = 0;
+
 
 	}
 
 	while(1) {
-		poll(players, 4, -1);
+		poll(players, POLL_ARRAY_NUM, -1);
 		
 		for(int i = 1; i < pind; i++) {
 			if(players[i].revents & POLLIN) {
 				char in;
 				recv(players[i].fd, &in, sizeof(char), 0); 
-				write(STDOUT_FILENO, &in, 1);
+				write(STDOUT_FILENO, &ts.buf[parray[i].txt_pos], 1);
+				int res;
+				if(strncmp(&in, &ts.buf[parray[i].txt_pos], 1) == 0) {
+					//write(STDOUT_FILENO, &in, 1);
+					//printf("Correct\n");
+					res = 1;
+					send(players[i].fd, &res, sizeof(int), 0);
+
+				} else {	
+					res = 0;
+					send(players[i].fd, &res, sizeof(int), 0);
+				}
+				parray[i].txt_pos += 1;
 			}
 		}
 	}
