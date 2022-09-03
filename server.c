@@ -126,6 +126,10 @@ void start_server(txt_segment ts) {
 					send(players[i].fd, &res, sizeof(int), 0);
 				}
 				parray[i].txt_pos += 1;
+				if(parray[i].txt_pos+1 == ts.size) {
+					printf("Player %d finished!\n", i);
+					close(players[i].fd);
+				}
 			}
 		}
 	}
