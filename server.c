@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <sys/socket.h>
@@ -21,11 +22,7 @@ void start_server(txt_segment ts) {
 	struct pollfd players[PLAYER_NUM+1];
 	player parray[PLAYER_NUM];
 	memset(&players, 0, sizeof(players));
-	/*
-	char *txtpass = load_file("a.txt");
-	printf("%s\n", txtpass);
-	printf("%d\n", strlen(txtpass));
-	*/
+	
 	printf("%d\n", ts.size);
 	printf("%s\n", ts.buf);
 	int opt = 1;
@@ -69,9 +66,7 @@ void start_server(txt_segment ts) {
 					//recv(players[pind].fd, parray[p_num].uname, sizeof(parray[p_num].uname), 0);
 					//write(STDOUT_FILENO, parray[p_num].uname, strlen(parray[p_num].uname));
 					players[pind].events = POLLIN;
-					memset(&parray[p_num], 0, sizeof(player));
-					//parray[p_num].txt_pos = 0;
-					//parray[p_num].comp_pos = 0;
+					memset(&parray[p_num], 0, sizeof(parray[p_num]));
 					p_num += 1;
 					pind += 1;
 
@@ -79,12 +74,9 @@ void start_server(txt_segment ts) {
 					char out;
 					recv(players[i].fd, &out, sizeof(char), 0);
 					if(iscntrl(out)) {
-						//printf("%s left\n", parray[i-1].uname);
 						//exit(0);
 						close(players[i].fd);
 					}
-					//printf("%d\n", parray[i-1].txt_pos);
-					//printf("%c\n", out);
 
 				}
 			} else if(p_num > PLAYER_NUM - 1) {
@@ -102,32 +94,45 @@ void start_server(txt_segment ts) {
 		send(players[i].fd, &ts.size, sizeof(int), 0);
 		send(players[i].fd, ts.buf, sizeof(char) * ts.size, 0);
 		parray[pind-1].txt_pos = 0;
+		//parray[pind-1].num_right = 0;
+		//parray[pind-1].num_wrong = 0;
+		parray[pind-1].is_wrong = 0;
 
 
 	}
 
 	while(1) {
 		poll(players, POLL_ARRAY_NUM, -1);
-		
+		char sp = ' ';	
 		for(int i = 1; i < pind; i++) {
 			if(players[i].revents & POLLIN) {
 				char in;
 				recv(players[i].fd, &in, sizeof(char), 0); 
-				write(STDOUT_FILENO, &ts.buf[parray[i].txt_pos], 1);
+				//write(STDOUT_FILENO, &ts.buf[parray[i].txt_pos], 1);
 				int res;
 				if(strncmp(&in, &ts.buf[parray[i].txt_pos], 1) == 0) {
-					//write(STDOUT_FILENO, &in, 1);
 					//printf("Correct\n");
 					res = 1;
 					send(players[i].fd, &res, sizeof(int), 0);
+					if(strncmp(&sp, &ts.buf[parray[i].txt_pos], 1) == 0) {
+						if(parray[i].is_wrong == 1) {
+							printf("Word incorrect\n");
+							parray[i].is_wrong = 0;
+						}
+					}
 
-				} else {	
+				} else {
+					//printf("Wrong\n");
 					res = 0;
 					send(players[i].fd, &res, sizeof(int), 0);
+					parray[i].is_wrong = 1;
 				}
+				
 				parray[i].txt_pos += 1;
+				printf("%d\n", parray[i].is_wrong);
 				if(parray[i].txt_pos+1 == ts.size) {
-					printf("Player %d finished!\n", i);
+					printf("\nPlayer %d finished!\n", i);
+					//printf("Correct: %d\nWrong: %d\n", parray[i].num_right, parray[i].num_wrong);
 					close(players[i].fd);
 				}
 			}
