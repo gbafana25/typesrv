@@ -11,4 +11,8 @@ Server component for multiplayer typetester
 - clients send current character typed
 
 
-- modify `typetester` to send positional data
+- note: integer overflow/error occurs on one player when parray size is two, doesn't happen w/ three.
+
+## TODO
+- display right/wrong words
+- allow changing of player number (config.h)
