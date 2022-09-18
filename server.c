@@ -13,7 +13,7 @@
 #include "multiplayer.h"
 #include "loader.h"
 
-#define PLAYER_NUM 3
+#define PLAYER_NUM 2
 #define POLL_ARRAY_NUM PLAYER_NUM+1
 
 
@@ -22,6 +22,7 @@ void start_server(txt_segment ts) {
 	struct pollfd players[POLL_ARRAY_NUM];
 	player parray[PLAYER_NUM];
 	memset(&players, 0, sizeof(players));
+	memset(&parray, 0, sizeof(parray));
 	
 	printf("%d\n", ts.size);
 	printf("%s\n", ts.buf);
@@ -66,8 +67,6 @@ void start_server(txt_segment ts) {
 					//recv(players[pind].fd, parray[p_num].uname, sizeof(parray[p_num].uname), 0);
 					//write(STDOUT_FILENO, parray[p_num].uname, strlen(parray[p_num].uname));
 					players[pind].events = POLLIN;
-					memset(&parray[p_num], 0, sizeof(player));
-					parray[pind-1].is_wrong = 0;
 					p_num += 1;
 					pind += 1;
 
@@ -81,7 +80,6 @@ void start_server(txt_segment ts) {
 
 				}
 			} else if(p_num > PLAYER_NUM - 1) {
-				//write(STDOUT_FILENO, "Full\n", 5);
 				waiting_for_players = 0;
 			}
 			
@@ -96,8 +94,8 @@ void start_server(txt_segment ts) {
 		send(players[i].fd, ts.buf, sizeof(char) * ts.size, 0);
 		parray[pind-1].txt_pos = 0;
 		//parray[pind-1].num_right = 0;
-		//parray[pind-1].num_wrong = 0;
-		//parray[pind-1].is_wrong = 0;
+		parray[pind-1].num_wrong = 0;
+		parray[pind-1].is_wrong = 0;
 
 
 	}
@@ -118,7 +116,10 @@ void start_server(txt_segment ts) {
 					if(ts.buf[parray[i].txt_pos] == ' ') {
 						if(parray[i].is_wrong == 1) {
 							printf("Word incorrect\n");
+							parray[i].num_wrong += 1;
 							parray[i].is_wrong = 0;
+						} else {
+							//parray[i].num_right += 1;
 						}
 					}
 
@@ -133,7 +134,7 @@ void start_server(txt_segment ts) {
 				printf("%d\n", parray[i].is_wrong);
 				if(parray[i].txt_pos+1 == ts.size) {
 					printf("\nPlayer %d finished!\n", i);
-					//printf("Correct: %d\nWrong: %d\n", parray[i].num_right, parray[i].num_wrong);
+					printf("Wrong: %d\n", parray[i].num_wrong);
 					close(players[i].fd);
 				}
 			}

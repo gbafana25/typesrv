@@ -1,9 +1,9 @@
 typedef struct {
 	//char uname[10];
-	int txt_pos;
-	int is_wrong;
-	//int num_right;
-	//int num_wrong;
+	unsigned int txt_pos;
+	unsigned int is_wrong;
+	unsigned int num_wrong;
+	//unsigned int num_right;
 	//bool is_wrong;
 
 
