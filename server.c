@@ -93,10 +93,6 @@ void start_server(txt_segment ts) {
 		send(players[i].fd, &ts.size, sizeof(int), 0);
 		send(players[i].fd, ts.buf, sizeof(char) * ts.size, 0);
 		parray[pind-1].txt_pos = 0;
-		//parray[pind-1].num_right = 0;
-		parray[pind-1].num_wrong = 0;
-		parray[pind-1].is_wrong = 0;
-
 
 	}
 
@@ -113,28 +109,17 @@ void start_server(txt_segment ts) {
 					//printf("Correct\n");
 					res = 1;
 					send(players[i].fd, &res, sizeof(int), 0);
-					if(ts.buf[parray[i].txt_pos] == ' ') {
-						if(parray[i].is_wrong == 1) {
-							printf("Word incorrect\n");
-							parray[i].num_wrong += 1;
-							parray[i].is_wrong = 0;
-						} else {
-							//parray[i].num_right += 1;
-						}
-					}
-
+					parray[i].txt_pos += 1;
+					
+						
 				} else {
-					//printf("Wrong\n");
 					res = 0;
 					send(players[i].fd, &res, sizeof(int), 0);
-					parray[i].is_wrong = 1;
-				}
+				}	
 				
-				parray[i].txt_pos += 1;
-				printf("%d\n", parray[i].is_wrong);
 				if(parray[i].txt_pos+1 == ts.size) {
 					printf("\nPlayer %d finished!\n", i);
-					printf("Wrong: %d\n", parray[i].num_wrong);
+					//printf("Wrong: %d\n", parray[i].num_wrong);
 					close(players[i].fd);
 				}
 			}

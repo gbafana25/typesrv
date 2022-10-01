@@ -9,10 +9,12 @@ Server component for multiplayer typetester
 	- poll loop works (sort of) now
 - server tells all players when game starts
 - clients send current character typed
+- server sends back if it's right or wrong
+	- clients cursor doesn't move if wrong
 
 
-- note: integer overflow/error occurs on one player when parray size is two, doesn't happen w/ three.
 
 ## TODO
-- display right/wrong words
 - allow changing of player number (config.h)
+- track player standings (after finishing + during race)
+- display place in real time (?)
