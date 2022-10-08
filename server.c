@@ -12,8 +12,9 @@
 
 #include "multiplayer.h"
 #include "loader.h"
+#include "config.h"
 
-#define PLAYER_NUM 2
+#define PLAYER_NUM player_num
 #define POLL_ARRAY_NUM PLAYER_NUM+1
 
 
@@ -117,15 +118,13 @@ void start_server(txt_segment ts) {
 					send(players[i].fd, &res, sizeof(int), 0);
 				}	
 				
-				if(parray[i].txt_pos+1 == ts.size) {
+				if(parray[i].txt_pos == ts.size) {
 					printf("\nPlayer %d finished!\n", i);
-					//printf("Wrong: %d\n", parray[i].num_wrong);
 					close(players[i].fd);
 				}
 			}
 		}
 	}
-
 
 
 
