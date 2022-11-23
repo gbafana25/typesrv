@@ -13,8 +13,3 @@ Server component for multiplayer typetester
 	- clients cursor doesn't move if wrong
 
 
-
-## TODO
-- allow changing of player number (config.h)
-- track player standings (after finishing + during race)
-- display place in real time (?)
