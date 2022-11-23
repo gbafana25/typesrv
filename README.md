@@ -1,6 +1,6 @@
 # typesrv
 
-Server component for multiplayer typetester
+Server component for multiplayer [typetester](https://github.com/gbafana25/typetester)
 
 ## Program flow
 
