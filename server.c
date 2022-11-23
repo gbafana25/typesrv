@@ -97,6 +97,7 @@ void start_server(txt_segment ts) {
 
 	}
 
+	int place = 1;
 	while(1) {
 		poll(players, POLL_ARRAY_NUM, -1);
 		char sp = ' ';	
@@ -120,6 +121,11 @@ void start_server(txt_segment ts) {
 				
 				if(parray[i].txt_pos == ts.size) {
 					printf("\nPlayer %d finished!\n", i);
+					res = 2;
+					send(players[i].fd, &res, sizeof(int), 0);
+					//send(players[i].fd, &place, sizeof(int), 0);
+					//printf("%c\n", place+48);
+					place += 1;
 					close(players[i].fd);
 				}
 			}
